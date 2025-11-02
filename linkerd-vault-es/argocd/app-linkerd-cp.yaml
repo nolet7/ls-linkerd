@@ -7,19 +7,39 @@ metadata:
     argocd.argoproj.io/sync-wave: "10"
 spec:
   project: platform
-  sources:
-    # Source 0: Remote Helm chart
-    - repoURL: 'https://helm.linkerd.io/stable'
-      chart: linkerd-control-plane
-      targetRevision: '>=1.16.0-0'
-      helm:
-        releaseName: linkerd
-        valueFiles:
-          - $repo/20-linkerd/values-linkerd.yaml
-    # Source 1: Your repo (provides the values file above)
-    - repoURL: 'https://github.com/nolet7/ls-linkerd.git'
-      targetRevision: 'main'
-      ref: repo
+  source:
+    repoURL: 'https://helm.linkerd.io/stable'
+    chart: linkerd-control-plane
+    targetRevision: '>=1.16.0-0'
+    helm:
+      releaseName: linkerd
+      values: |
+        installNamespace: false
+        identityTrustAnchorsPEM: |
+          -----BEGIN CERTIFICATE-----
+          MIIDHzCCAgegAwIBAgIURc7RzepIMOQ/vHRo0li2WmqWJGswDQYJKoZIhvcNAQEL
+          BQAwHzEdMBsGA1UEAwwUbGlua2VyZC10cnVzdC1hbmNob3IwHhcNMjUxMTAyMDIw
+          MjQxWhcNMzUxMDMxMDIwMjQxWjAfMR0wGwYDVQQDDBRsaW5rZXJkLXRydXN0LWFu
+          Y2hvcjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJuAMfWSAare6XeM
+          y+N0adlpAE9735H6HMGO8xNnvx3yqBBSF2968+cOLqwooHI/HI1liuZrB9G3dnB4
+          RGmjClWfFiqhC5v9btaPpRO7fLlWdotQD4ouo72a7MzBcZzXiMYDGhYFcCD58wcG
+          QlE6UWJFJ7DW8aQ2T050VTQVbm+F/i/kaxcLbdAOjTZvAPz9ATYNZZBzZRoV1iNI
+          dxgQM+tBcczQtzx11v1LsY2rUg9CfIZTQXnz/gj1+Z25/uQv2rHIS9B3eixqhBB2
+          X023eA+zZbrBGwdLPpbyGntGWUaQlGPFQ+q3eOjfBVPXoztSDoZ3ng5NTG/u3Bjp
+          9Hds+BMCAwEAAaNTMFEwHQYDVR0OBBYEFKllgw4I1kaxGS/TXYa+zLHkO2/NMB8G
+          A1UdIwQYMBaAFKllgw4I1kaxGS/TXYa+zLHkO2/NMA8GA1UdEwEB/wQFMAMBAf8w
+          DQYJKoZIhvcNAQELBQADggEBAHf3z31eDNkR3dFu4wKR7XZbG/3NFoh2u4ATRitO
+          VosI7ivi6VngfBmC6zfki1XQuNs/9ycraQNfNTlmTNhxFB0Xh41Nbce6Acl1bR9K
+          zQ8Ju1iQ7u7D9xUXaJ0okQTXn32JQDGo4HI5xGiSJyF4QU7cKTlI3BV4tJCY3JD2
+          iy1/wgGJ/kiTkypGFxBx1bGIOIVJKPT8wsIxuddYf0qTa5CS5Rk2q4H1xPHQqk5f
+          1aSnAd1Xes2owZd5ZoSBYp6gLuoAN/pA7ORJO5llVezRmwRnN5uIqO6zNR5HUVdw
+          0sy4rs/bIWKu7TRrMAwro8j6QCNM3FszLBRmlaIBopER2Wo=
+          -----END CERTIFICATE-----
+        identity:
+          issuer:
+            scheme: kubernetes
+        controllerReplicas: 1
+        enablePodAntiAffinity: true
   destination:
     server: https://kubernetes.default.svc
     namespace: linkerd
@@ -40,4 +60,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-
