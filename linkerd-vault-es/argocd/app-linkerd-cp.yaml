@@ -4,45 +4,35 @@ metadata:
   name: linkerd
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-wave: "4"
 spec:
   project: platform
   source:
-    repoURL: 'https://helm.linkerd.io/stable'
+    repoURL: "https://helm.linkerd.io/stable"
     chart: linkerd-control-plane
-    targetRevision: '>=1.16.0-0'
+    targetRevision: ">=1.16.0-0"
     helm:
       releaseName: linkerd
-      values: |
-        installNamespace: false
-        identityTrustAnchorsPEM: |
-          -----BEGIN CERTIFICATE-----
-          MIIFDjCCAvagAwIBAgIUFYP5M0irRNrW3SK5n5tUfLaUDIUwDQYJKoZIhvcNAQEL
-          BQAwHzEdMBsGA1UEAwwUbGlua2VyZC10cnVzdC1hbmNob3IwHhcNMjUxMTAyMDI1
-          MDI2WhcNMzUxMDMxMDI1MDI2WjAfMR0wGwYDVQQDDBRsaW5rZXJkLXRydXN0LWFu
-          Y2hvcjCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBAN87JXrlCwuUmI21
-          s3nOvT70YLgwyFYdQ38JlndNidlIXYMhteuq9MUdMEqcVvHJviqg2lLnL2gxDcmp
-          5vi9ft/4cKTkliEWdRlqXxqaVzC6ypA8baWNoBiTM/bY8RM4SCWjZPOsekPY9Dcs
-          ginc6MpzuaRjZ8PLbtm5BHGPRTH3SK9McZtlxaTxyvd8jid5Y9QoxYgCVcqS1fji
-          MzGF6R/hFVdPyItbeJG5r615Ddm5jyhGOgBVnMmaMIRM8CHKo76YSzI+a7M+xAA7
-          GnnkmQOLq31agE2tS9HpAj07FKr1fVZcqGA5Rxwm3pxhssvPgy8cTEPqpdGy6S0y
-          sisr0AH6l8W3+MofXleUthu2mPXHVZpXcs0WFnW7Vr1jXPlaseMA9q34xAUMUxfK
-          pPXv1qidsvL21UCLyjWpRSxXoaoUtvn+0lxv10QR8ZmV29o8Ht6lsJ3O5jYuB81Z
-          bSoYfCvuxsKwqrW6RtDiCpsstxBIb4yETTAghbmRs1hwxgpZDSD1vou9MNVJM2g/
-          2AFsIZgnANNcCqEQVYeAAyY3CiGgDy+MaQloydAXeQC12mqkNNAe36Vwc4FLtWIo
-          mLJJv44gQWtv88VorY99UlDuOwoaxjxnMdic4pP6uFlKmJGwCa7DHkygeqSX/jIJ
-          Z9Z2lOq1pqmiyx4y7RTbFEyqBlDdAgMBAAGjQjBAMA8GA1UdEwEB/wQFMAMBAf8w
-          DgYDVR0PAQH/BAQDAgEGMB0GA1UdDgQWBBT7UhxN5B6R3U1NEOj7RM4EK+PgozAN
-          BgkqhkiG9w0BAQsFAAOCAgEAIZExBAQbYLWMLHMM5bsd6lN5nsv3qthl+z+oBPPI
-          HbC1eQlWIR4akaLuxlw33Ipt3yNlkKcCQiNj/rJw1v3Y8vchEk43X2J27+Dk0a3O
-          j004IvY0uFThnEnLNEBla36s5a8IOrECGFHZk97Gg1JbXxyjnT4oKUEZyVFHmCFP
-          akNLOe+3tX2/o1fVhMJTnHvbCB4OSyUp7Fz3FHYlI8qjbc9aM3ZY68ogqopdFHBs
-          l4F++WxEgICx0FYBDtLblCCBfRPbapPDqzSrs0gZ96HBthvgsjCVQj+wXsGFH+FA
-          U8YwU1xI8P74KPScvf3r1fZlpXn3I91sMb6RYhGIBH+774aj5ewapxxb3Bzfwoc6
-          4Y94t+wZn1WqP/GkI2ykbNo0OTDzKKqh5ESG+VrWvO3zF8dcBy7Iw3urRxGDPXZZ
-          6blSIe7zT/UZUf63uEp6wJhTlejDl0pg7jj002UdehjnSbIHKtsOiIer2Fu8XLW/
-          taCpPndDYs07XPN9iWRKKw6xmti1FT9/213HamyfF3fKHI45ZjVtqzLYLP1vGr3C
-          0oqTG1YSbpeqV536AWubNQMutHK5b/DkZspfECtJVrS5X7D9FOmc9N3O2JzPnWmG
-          +HJdPb2iYK/647TjawiUL1hBX8RoD6TsLb2VhN3icFDKpQxOZV1l7rjG7C1bNqt1
-          N6o=
-          -----END CERTIFICATE-----
+      valuesFrom:
+        - kind: Secret
+          name: linkerd-helm-values
+          namespace: argocd
+          valuesKey: values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: linkerd
+  ignoreDifferences:
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      name: linkerd-proxy-injector-webhook-config
+      jsonPointers: ["/webhooks/0/clientConfig/caBundle"]
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      name: linkerd-policy-validator-webhook-config
+      jsonPointers: ["/webhooks/0/clientConfig/caBundle"]
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
