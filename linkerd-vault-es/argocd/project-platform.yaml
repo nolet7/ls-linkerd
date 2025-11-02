@@ -1,14 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
-metadata:
-  name: platform
-  namespace: argocd
+metadata: {name: platform, namespace: argocd}
 spec:
-  destinations:
-  - namespace: '*'
-    server: '*'
-  sourceRepos:
-  - '*'
-  clusterResourceWhitelist:
-  - group: '*'
-    kind: '*'
+  destinations: [{namespace: "*", server: "*"}]
+  sourceRepos: ["*"]
+  clusterResourceWhitelist: [{group: "*", kind: "*"}]

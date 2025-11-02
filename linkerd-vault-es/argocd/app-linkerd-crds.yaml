@@ -3,22 +3,15 @@ kind: Application
 metadata:
   name: linkerd-crds
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
+  annotations: {argocd.argoproj.io/sync-wave: "1"}
 spec:
   project: platform
   source:
-    repoURL: "https://helm.linkerd.io/stable"
+    repoURL: https://helm.linkerd.io/stable
     chart: linkerd-crds
     targetRevision: ">=1.6.0-0"
-    helm:
-      releaseName: linkerd-crds
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: linkerd
+    helm: {releaseName: linkerd-crds}
+  destination: {server: https://kubernetes.default.svc, namespace: linkerd}
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+    automated: {prune: true, selfHeal: true}
+    syncOptions: ["CreateNamespace=true"]

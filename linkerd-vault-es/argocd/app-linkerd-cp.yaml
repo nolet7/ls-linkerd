@@ -3,12 +3,11 @@ kind: Application
 metadata:
   name: linkerd
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "4"
+  annotations: {argocd.argoproj.io/sync-wave: "4"}
 spec:
   project: platform
   source:
-    repoURL: "https://helm.linkerd.io/stable"
+    repoURL: https://helm.linkerd.io/stable
     chart: linkerd-control-plane
     targetRevision: ">=1.16.0-0"
     helm:
@@ -18,9 +17,7 @@ spec:
           name: linkerd-helm-values
           namespace: argocd
           valuesKey: values.yaml
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: linkerd
+  destination: {server: https://kubernetes.default.svc, namespace: linkerd}
   ignoreDifferences:
     - group: admissionregistration.k8s.io
       kind: MutatingWebhookConfiguration
@@ -31,8 +28,5 @@ spec:
       name: linkerd-policy-validator-webhook-config
       jsonPointers: ["/webhooks/0/clientConfig/caBundle"]
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
+    automated: {prune: true, selfHeal: true}
+    syncOptions: ["CreateNamespace=true"]
