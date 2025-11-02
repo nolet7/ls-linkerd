@@ -1,0 +1,14 @@
+installNamespace: false
+
+# This will be replaced by a script below with the content of linkerd-trust-roots:ca.crt
+identityTrustAnchorsPEM: |
+  __INJECT_CA_PEM_HERE__
+
+identity:
+  issuer:
+    # Linkerd reads keypair from Secret linkerd/linkerd-identity-issuer (created by ESO)
+    scheme: kubernetes
+
+controllerReplicas: 1
+enablePodAntiAffinity: true
+# clusterDomain: cluster.local

@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: eso
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-30"
+spec:
+  project: platform
+  source:
+    repoURL: 'https://github.com/nolet7/ls-linkerd.git'
+    targetRevision: 'main'
+    path: 00-eso
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: external-secrets
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+

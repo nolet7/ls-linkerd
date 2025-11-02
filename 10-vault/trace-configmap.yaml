@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vault-eso-trace
+  namespace: external-secrets
+data:
+  VAULT_ADDR: "http://107.178.216.238:8200"
+  VAULT_AUTH_PATH: "kubernetes"
+  VAULT_ROLE: "eso-external-secrets"
+  KV_MOUNT: "Dev-secret"
+  INTENDED_SECRETS: |
+    - Dev-secret/linkerd/issuer
+      keys:
+        - tls.crt
+        - tls.key
+    - Dev-secret/linkerd/root
+      keys:
+        - ca.crt
+  NOTES: |
+    - Ensure Vault policy 'eso-linkerd' includes:
+        Dev-secret/data/linkerd/*   -> read
+        Dev-secret/metadata/linkerd/* -> read,list
+    - Ensure Vault Kubernetes auth role 'eso-external-secrets' binds:
+        SA: external-secrets in ns: external-secrets
+    - For HTTPS Vault with private CA, create 'vault-ca' Secret and set caProvider in SecretStore.
+

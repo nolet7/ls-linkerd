@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: linkerd-es
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+spec:
+  project: platform
+  source:
+    repoURL: 'https://github.com/nolet7/ls-linkerd.git'
+    targetRevision: 'main'
+    path: 20-linkerd
+    directory:
+      recurse: true
+      include: |
+        es-linkerd-issuer.yaml
+        es-linkerd-root.yaml
+        ns.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: linkerd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+

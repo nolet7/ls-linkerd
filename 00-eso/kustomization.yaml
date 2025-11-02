@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # CRDs
+  - https://github.com/external-secrets/external-secrets//deploy/crds?ref=v0.20.4
+  # Operator (controller + RBAC)
+  - https://github.com/external-secrets/external-secrets//deploy?ref=v0.20.4
+namespace: external-secrets
